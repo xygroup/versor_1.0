@@ -9,6 +9,4 @@
 #ifndef Versor_vsr_constraint_h
 #define Versor_vsr_constraint_h
 
-
-
 #endif

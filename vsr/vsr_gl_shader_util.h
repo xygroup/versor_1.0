@@ -6,34 +6,30 @@
 //  Copyright (c) 2012 __MyCompanyName__. All rights reserved.
 //
 /*
- 
+
  For building shaders from pieces
- 
+
  */
 
 #ifndef vsr_vsr_shader_util_h
 #define vsr_vsr_shader_util_h
 
-#include "vsr_gui.hpp"
 #include "vsr_gl_shader.h"
+#include "vsr_gui.hpp"
 
 namespace vsr {
 
-    namespace GLSL {
-        
-        
-    
-    }
+namespace GLSL {}
 
-//class ShaderGui : public Gui {
+// class ShaderGui : public Gui {
 //
 //    public:
-//    
+//
 //    ShaderProgram * shader;
-//    
-//    
-//    
+//
+//
+//
 //};
-}
+}  // namespace vsr
 
 #endif

@@ -13,27 +13,31 @@
 #ifndef vsr_static_Drawable_h
 #define vsr_static_Drawable_h
 
+namespace vsr {
 
-namespace vsr  {
+struct Drawable {
+  virtual void draw() = 0;
+  // int id;
+};
 
-  struct Drawable {
-    
-    virtual void draw() = 0;
-    //int id;
-  };
-  
-  struct Touchable : public Drawable {
-    Touchable() : bSelected(0){}
-    bool bSelected;
-//    virtual void onMouseDown() = 0;
-//    virtual void hitTest() = 0;
-    Touchable& select()     { bSelected = 1; return *this; }
-    Touchable& deselect()   { bSelected = 0; return *this; }
-    bool isSelected()  const { return bSelected; }
-    bool& isSelected()  { return bSelected; }
-    void toggle() { bSelected = !bSelected; }
-    virtual void draw(){}
-  };
-}
+struct Touchable : public Drawable {
+  Touchable() : bSelected(0) {}
+  bool bSelected;
+  //    virtual void onMouseDown() = 0;
+  //    virtual void hitTest() = 0;
+  Touchable& select() {
+    bSelected = 1;
+    return *this;
+  }
+  Touchable& deselect() {
+    bSelected = 0;
+    return *this;
+  }
+  bool isSelected() const { return bSelected; }
+  bool& isSelected() { return bSelected; }
+  void toggle() { bSelected = !bSelected; }
+  virtual void draw() {}
+};
+}  // namespace vsr
 
 #endif

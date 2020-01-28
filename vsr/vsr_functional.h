@@ -15,14 +15,8 @@
 #ifndef Versor_vsr_functional_h
 #define Versor_vsr_functional_h
 
-
 #include "vsr_exptemp.h"
 
-namespace vsr {
-
-    
-
-}
-
+namespace vsr {}
 
 #endif

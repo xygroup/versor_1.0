@@ -2,9 +2,9 @@
  *  xConstants.h
  *  gelatin
  *
- 
+
  IRRATIONALS
- 
+
  *  Created by x on 5/22/09.
  *  Copyright 2009 __MyCompanyName__. All rights reserved.
  *
@@ -13,8 +13,8 @@
 #ifndef XCONSTANTS_H_INCLUDED
 #define XCONSTANTS_H_INCLUDED
 
-namespace vsr{
-    
+namespace vsr {
+
 #define PI 3.141592653589793
 #define TWOPI 6.283185307179586
 #define PIOVERTWO 1.570796326794897
@@ -31,15 +31,14 @@ namespace vsr{
 #define ROOT2 1.41421
 #define ROOT3 1.73205
 #define FPERROR .00000001
-#define ERROR(x,y) (x<=y && x>=-y)
+#define ERROR(x, y) (x <= y && x >= -y)
 #define MAXRADIUS 100000
 
-#define CLAMP(val,min,max) val<min?min:val>max?max:val
-#define D2R(val) PI*val/180.0
+#define CLAMP(val, min, max) val<min ? min : val> max ? max : val
+#define D2R(val) PI* val / 180.0
 
 //#define EPSILON
 
-} //vsr::
+}  // namespace vsr
 
 #endif
-

@@ -15,22 +15,15 @@
 #ifndef Versor_vsr_mechanism_h
 #define Versor_vsr_mechanism_h
 
-
 #include "vsr_frame.h"
 
 namespace vsr {
 
-    class Mechanism : public Frame {
-    
-        public:
-        
-            
-        
-        protected:
-    
-    }
-
+class Mechanism : public Frame {
+ public:
+ protected:
 }
 
+}  // namespace vsr
 
 #endif

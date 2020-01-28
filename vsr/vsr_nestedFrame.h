@@ -11,20 +11,14 @@
 
 namespace vsr {
 
-    /// Frames within Frames
-    struct NestedFrame : public Frame {
-         NestedFrame() : Frame(), mParent(NULL) {}  
+/// Frames within Frames
+struct NestedFrame : public Frame {
+  NestedFrame() : Frame(), mParent(NULL) {}
 
-        
+ private:
+  Frame* mParent;
+};
 
-         private:
-         Frame * mParent;
-         
-         
-    };
-
-
-
-} //vsr::
+}  // namespace vsr
 
 #endif

@@ -1,499 +1,451 @@
 #ifndef INC_DRAWNODE_H
 #define INC_DRAWNODE_H
 
-#include "vsr_gxlib.h"
-#include "vsr_vertex.h"
-
-#include "GraphicsMatrix.h"
-#include "vsr_gl_varray.h"
-#include "vsr_gl_vbo.h"
-#include "vsr_gl_texture.h"
-#include "vsr_gl_shader.h"
-#include "vsr_gl_material.h"
-#include "vsr_gl_fbo.h"
-
 #include <map>
 #include <string>
-#include <vector>
 #include <typeinfo>
+#include <vector>
+
+#include "GraphicsMatrix.h"
+#include "vsr_gl_fbo.h"
+#include "vsr_gl_material.h"
+#include "vsr_gl_shader.h"
+#include "vsr_gl_texture.h"
+#include "vsr_gl_varray.h"
+#include "vsr_gl_vbo.h"
+#include "vsr_gxlib.h"
+#include "vsr_vertex.h"
 
 namespace vsr {
 
 /*
-	An interface for creating a drawing-graph
+        An interface for creating a drawing-graph
 */
 
-using namespace std;    
-    
+using namespace std;
+
 class AssetManager;
-    
-class Graphics{};
-class vsr_sec{};
+
+class Graphics {};
+class vsr_sec {};
 
 //    class ShaderNode;
 //    class MaterialNode;
 //    class MeshNode;
-    
+
 class DrawNode {
+ public:
+  //	typedef std::map<std::string, DrawNode *> DrawNodes;
+  //	typedef std::map<std::string, DrawNode *>::iterator DrawNodePtr;
+  typedef std::vector<DrawNode*> DrawNodes;
+  typedef std::vector<DrawNode*>::iterator DrawNodePtr;
 
+  enum NodeType {
+    RENDERNODE = 0,
+    SHADERNODE,
+    SPRITENODE,
+    MATERIALNODE,
+    MESHNODE,
+    OPAQUENODE,
+    TRANSPARENCYNODE,
+  };
 
-public:
-        
-//	typedef std::map<std::string, DrawNode *> DrawNodes;
-//	typedef std::map<std::string, DrawNode *>::iterator DrawNodePtr;
-	typedef std::vector<DrawNode *> DrawNodes;
-	typedef std::vector<DrawNode *>::iterator DrawNodePtr;
-    
-    enum NodeType {
-        RENDERNODE = 0,
-        SHADERNODE,
-        SPRITENODE,
-        MATERIALNODE,
-        MESHNODE,
-        OPAQUENODE,
-        TRANSPARENCYNODE,
-    };
-    
-    bool parentIs( NodeType t );
+  bool parentIs(NodeType t);
 
-	DrawNode() : mParent(NULL), initialized(false), bDraw(true), bBypass(false) {}
-	DrawNode(std::string n) : mParent(NULL), initialized(false), bDraw(true), bBypass(false), name(n) {}
+  DrawNode() : mParent(NULL), initialized(false), bDraw(true), bBypass(false) {}
+  DrawNode(std::string n)
+      : mParent(NULL),
+        initialized(false),
+        bDraw(true),
+        bBypass(false),
+        name(n) {}
 
-	virtual ~DrawNode() {
-		if (mParent) mParent->remove(this);
-	}
+  virtual ~DrawNode() {
+    if (mParent) mParent->remove(this);
+  }
 
-	virtual void onInitialize(Graphics& gl) {};
-	virtual void onUnInitialize(Graphics& gl) {};
-	virtual void onEnter(Graphics& gl, vsr_sec ) {};
-	virtual void onDraw(Graphics& gl) {};
-	virtual void onLeave(Graphics& gl, vsr_sec) {};
+  virtual void onInitialize(Graphics& gl){};
+  virtual void onUnInitialize(Graphics& gl){};
+  virtual void onEnter(Graphics& gl, vsr_sec){};
+  virtual void onDraw(Graphics& gl){};
+  virtual void onLeave(Graphics& gl, vsr_sec){};
 
-//	DrawNode * find(std::string name) {
-//		std::map<std::string, DrawNode *>::iterator it = mChildren.find(name);
-//		if (it != mChildren.end()) {
-//			return (*it).second;
-//		}
-//		// try recursing:
-//		for (it = mChildren.begin(); it != mChildren.end(); it++) {
-//			DrawNode * child = it->second;
-//			DrawNode * result = child->find(name);
-//			if (result) return result;
-//		}
-//		return NULL;
-//	}
+  //	DrawNode * find(std::string name) {
+  //		std::map<std::string, DrawNode *>::iterator it =
+  //mChildren.find(name); 		if (it != mChildren.end()) { 			return (*it).second;
+  //		}
+  //		// try recursing:
+  //		for (it = mChildren.begin(); it != mChildren.end(); it++) {
+  //			DrawNode * child = it->second;
+  //			DrawNode * result = child->find(name);
+  //			if (result) return result;
+  //		}
+  //		return NULL;
+  //	}
 
-	void uninitialize(Graphics& gl) {
-        if (initialized) {
-            onUnInitialize(gl);
-            initialized = false;
-        }
-		DrawNodePtr it = mChildren.begin();
-		while (it != mChildren.end()) {
-			DrawNode * v = (*it);
-			v->uninitialize(gl);
-			it++;
-		}
-	}
+  void uninitialize(Graphics& gl) {
+    if (initialized) {
+      onUnInitialize(gl);
+      initialized = false;
+    }
+    DrawNodePtr it = mChildren.begin();
+    while (it != mChildren.end()) {
+      DrawNode* v = (*it);
+      v->uninitialize(gl);
+      it++;
+    }
+  }
 
-	void draw(Graphics& gl, vsr_sec now) {
-		
-		if (bDraw){
-			if (!initialized) {
-				onInitialize(gl);
-				initialized = true;
-			}
-	
-			if (!bBypass) onEnter(gl, now);
-	
-			if (!bBypass) onDraw(gl);
+  void draw(Graphics& gl, vsr_sec now) {
+    if (bDraw) {
+      if (!initialized) {
+        onInitialize(gl);
+        initialized = true;
+      }
 
-			DrawNodePtr it = mChildren.begin();
-			
-			while (it != mChildren.end()) {
-				
-//				std::string name = it->first;
-//				int id = it->first;
-				DrawNode * v = *it;
-				v->draw(gl, now);
-				it++;
-			}
+      if (!bBypass) onEnter(gl, now);
 
-			if (!bBypass) onLeave(gl, now);
-		}
-	}
+      if (!bBypass) onDraw(gl);
 
-//	void add(DrawNode * v, std::string name){
-//		if (v->mParent) {
-//			if (v->mParent == this) return;
-//			v->mParent->remove(v);
-//		}
-//		v->mParent = this;
-//		mChildren[name] = v;
-//	}
+      DrawNodePtr it = mChildren.begin();
 
-//	DrawNode * add(DrawNode * v ){
-//		if (v->mParent) {
-//			if (v->mParent == this) return this;
-//			v->mParent->remove(v);
-//		}
-//		v->mParent = this;
-//		
-//		std::string tname;
-//		if (v->name == "") {
-//			printf("noname\n");
-//			tname = "unnamed";
-//		}
-//		else {
-//			tname = v->name;
-//		}	
-//		mChildren[tname] = v;
-//		return this;
-//	}
+      while (it != mChildren.end()) {
+        //				std::string name = it->first;
+        //				int id = it->first;
+        DrawNode* v = *it;
+        v->draw(gl, now);
+        it++;
+      }
 
-	void add( DrawNode * v ){
-		if (v->mParent) {
-			if (v->mParent == this) return;
-			v->mParent->remove(v);
-		}
-		v->mParent = this;
-		mChildren.push_back(v);//[name] = v;
-        
-        printf("adding node\n");
-	}
-	
-    
-	
-	void remove(DrawNode * v){
-		v->mParent = NULL;
-	}
+      if (!bBypass) onLeave(gl, now);
+    }
+  }
 
-	DrawNode * mParent;
-	DrawNodes mChildren;
+  //	void add(DrawNode * v, std::string name){
+  //		if (v->mParent) {
+  //			if (v->mParent == this) return;
+  //			v->mParent->remove(v);
+  //		}
+  //		v->mParent = this;
+  //		mChildren[name] = v;
+  //	}
 
-	bool initialized;
-	bool bBypass;
-	bool bDraw;
-	bool bIsLeaf;
-	
-	std::string name;
-    
-    
+  //	DrawNode * add(DrawNode * v ){
+  //		if (v->mParent) {
+  //			if (v->mParent == this) return this;
+  //			v->mParent->remove(v);
+  //		}
+  //		v->mParent = this;
+  //
+  //		std::string tname;
+  //		if (v->name == "") {
+  //			printf("noname\n");
+  //			tname = "unnamed";
+  //		}
+  //		else {
+  //			tname = v->name;
+  //		}
+  //		mChildren[tname] = v;
+  //		return this;
+  //	}
 
+  void add(DrawNode* v) {
+    if (v->mParent) {
+      if (v->mParent == this) return;
+      v->mParent->remove(v);
+    }
+    v->mParent = this;
+    mChildren.push_back(v);  //[name] = v;
+
+    printf("adding node\n");
+  }
+
+  void remove(DrawNode* v) { v->mParent = NULL; }
+
+  DrawNode* mParent;
+  DrawNodes mChildren;
+
+  bool initialized;
+  bool bBypass;
+  bool bDraw;
+  bool bIsLeaf;
+
+  std::string name;
 };
 
-
 class OpaqueNode : public DrawNode {
+ public:
+  OpaqueNode() : DrawNode() {}
 
-	public:
-	OpaqueNode() : DrawNode() {}
-
-
-	virtual void onEnter(Graphics& gl, vsr_sec now){
-
-		GL::depthTesting(1);
-		GL::depthMask(1);
-		GL::blending(0);
-	}
-    virtual void onDraw(Graphics& gl) {};
-	virtual void onLeave(Graphics& gl, vsr_sec now){
-		GL::depthTesting(1);
-		GL::depthMask(1);
-	}
+  virtual void onEnter(Graphics& gl, vsr_sec now) {
+    GL::depthTesting(1);
+    GL::depthMask(1);
+    GL::blending(0);
+  }
+  virtual void onDraw(Graphics& gl){};
+  virtual void onLeave(Graphics& gl, vsr_sec now) {
+    GL::depthTesting(1);
+    GL::depthMask(1);
+  }
 };
 
 class TransparencyNode : public DrawNode {
+ public:
+  TransparencyNode()
+      : DrawNode(),
+        bDepthTest(1),
+        bDepthMask(0),
+        bBlend(1),
+        src(GL::SRC_ALPHA),
+        dst(GL::ONE_MINUS_SRC_ALPHA),
+        eq(GL::FUNC_ADD) {}
 
-	public:
+  virtual ~TransparencyNode() {}
 
-	TransparencyNode() : DrawNode(),
-	bDepthTest(1), bDepthMask(0), bBlend(1),
-	src(GL::SRC_ALPHA), dst(GL::ONE_MINUS_SRC_ALPHA),
-	eq(GL::FUNC_ADD)
-	{}
+  virtual void onEnter(Graphics& gl, vsr_sec now) {
+    // glDisable(GL_CULL_FACE);
 
-	virtual ~TransparencyNode() {}
+    // glCullFace(GL_FRONT);
+    // glEnable(GL_CULL_FACE);
 
-	virtual void onEnter(Graphics& gl, vsr_sec now){
-		//glDisable(GL_CULL_FACE);
+    GL::depthTesting(bDepthTest);
+    GL::depthMask(!bBlend);
+    GL::blending(bBlend);
+    GL::blendMode(src, dst, eq);
+  }
 
-		//glCullFace(GL_FRONT);
-		//glEnable(GL_CULL_FACE);
+  virtual void onDraw(Graphics& gl){};
 
-        GL::depthTesting(bDepthTest);
-		GL::depthMask(!bBlend);
-		GL::blending(bBlend);
-		GL::blendMode(src, dst, eq);
-	}
-	
-    virtual void onDraw(Graphics& gl) {};
+  virtual void onLeave(Graphics& gl, vsr_sec now) {
+    // glDisable(GL_CULL_FACE);
 
-	virtual void onLeave(Graphics& gl, vsr_sec now){
+    GL::depthTesting(1);
+    GL::depthMask(1);
+    GL::blending(0);
+  }
 
-		//glDisable(GL_CULL_FACE);
-
-		GL::depthTesting(1);
-		GL::depthMask(1);
-		GL::blending(0);
-	}
-
-	bool bDepthTest, bDepthMask, bBlend;
-	GL::BlendFunc src;
-	GL::BlendFunc dst;
-	GL::BlendEq eq;
+  bool bDepthTest, bDepthMask, bBlend;
+  GL::BlendFunc src;
+  GL::BlendFunc dst;
+  GL::BlendEq eq;
 };
 
 class RenderNode : public DrawNode {
-    
-    FBO mFBO;
-    int mWidth, mHeight;
-    
-    bool bRTT;
-    
-public:
-    
-    RenderNode(int w, int h, bool RTT = true) : mWidth(w), mHeight(h), bRTT(RTT) {}
+  FBO mFBO;
+  int mWidth, mHeight;
 
-    virtual void onInitialize(Graphics& gl) {
-        if (bRTT){
-            mFBO.init();
-            mFBO.attachTextureBuffer(mWidth, mHeight);            
-        }
+  bool bRTT;
+
+ public:
+  RenderNode(int w, int h, bool RTT = true)
+      : mWidth(w), mHeight(h), bRTT(RTT) {}
+
+  virtual void onInitialize(Graphics& gl) {
+    if (bRTT) {
+      mFBO.init();
+      mFBO.attachTextureBuffer(mWidth, mHeight);
     }
-    virtual void onUnitialize(Graphics& gl);
-    
-    virtual void onEnter(Graphics& gl, vsr_sec n){
-        mFBO.enter();
-    }
-    
-    virtual void onLeave(Graphics& gl, vsr_sec n){
-        FBO::Unbind();
-    }
-    virtual void onDraw(Graphics& gl);
-    
-    
+  }
+  virtual void onUnitialize(Graphics& gl);
+
+  virtual void onEnter(Graphics& gl, vsr_sec n) { mFBO.enter(); }
+
+  virtual void onLeave(Graphics& gl, vsr_sec n) { FBO::Unbind(); }
+  virtual void onDraw(Graphics& gl);
 };
 
 //    static int deg = 1; deg++;
 //    float c = PI * deg/180.0;
 //
 //    Mat4f tmp = XMat::rot( Rot( cos(c), sin(c), 0, 0 ) );
-//    
-    //copy(tmp.val(), tmp.val() + 16,  uniformMat4f[0].val);    
+//
+// copy(tmp.val(), tmp.val() + 16,  uniformMat4f[0].val);
 
 class ShaderNode : public DrawNode {
+ public:
+  ShaderNode(ShaderProgram* s) : DrawNode(), shaderprogram(s) {}
 
-public:
-    
-    ShaderNode(ShaderProgram * s) : DrawNode(), shaderprogram(s) 
-    {
-        
+  // Load in Code
+  ShaderNode(const char* vert_code, const char* frag_code)
+      : DrawNode(), bVert(1), bFrag(1), bGeom(0), bTime(0) {
+    load(vert_code, frag_code);
+  }
+
+  ShaderNode(string vertfile, string fragfile, string geomfile)
+      : DrawNode(), bVert(1), bFrag(1), bGeom(1), bTime(0) {
+    load(vertfile, fragfile);
+    // geom.source(geom_code, Shader::GEOMETRY);
+  }
+
+  virtual ~ShaderNode() {}
+
+  void load(string vertfile, string fragfile) {
+    shaderprogram = new ShaderProgram(vertfile, fragfile);
+  }
+
+  virtual void onInitialize(Graphics& gl) {
+    printf("init ShaderNode\n");
+
+    if (shaderprogram) {
+      if (!shaderprogram->loaded()) {
+        //        shaderprogram.attach(vert);
+        //        shaderprogram.attach(frag);
+        //        shaderprogram.link();
+        //        shaderprogram.get();
+
+      } else {
+        printf("SHADER LOADED\n");
+      }
     }
+  }
 
-	//Load in Code
-	ShaderNode(const char * vert_code, const char * frag_code) :
-		DrawNode(),
-		bVert(1), bFrag(1), bGeom(0), bTime(0)
-	{
-        load(vert_code, frag_code);
-	}
+  virtual void onUnInitialize(Graphics& gl) {}
 
-	ShaderNode(string vertfile, string fragfile, string geomfile) :
-		DrawNode(),
-		bVert(1), bFrag(1), bGeom(1), bTime(0)
-	{
-        load(vertfile, fragfile);
-		//geom.source(geom_code, Shader::GEOMETRY);
-	}
-    
-	virtual ~ShaderNode() {}
+  virtual void onEnter(Graphics& gl, vsr_sec now) {
+    //		if (shaderprogram.linked())
 
-	void load( string vertfile, string fragfile ){
-        shaderprogram  = new ShaderProgram(vertfile, fragfile );
-	}
+    shaderprogram->begin();
+    data.update(shaderprogram);
 
-	virtual void onInitialize(Graphics& gl) {
-        printf("init ShaderNode\n");
+    // Bind Current Time to Shader
+    //		if (bTime) shaderprogram.uniform("now", 1.f );
+  }
+  virtual void onDraw(Graphics& gl){};
 
-        if (shaderprogram){
-            if (! shaderprogram -> loaded() ){
+  virtual void onLeave(Graphics& gl, vsr_sec now) {
+    //		if (shaderprogram.linked())
+    shaderprogram->end();
+  }
 
-            //        shaderprogram.attach(vert);
-            //        shaderprogram.attach(frag);                
-            //        shaderprogram.link();
-            //        shaderprogram.get();
-                
-            } else {
-                
-                printf("SHADER LOADED\n");
-            }
-            
-        }
+  bool bVert, bFrag, bGeom;
+  bool bTime;
 
-    }
+  ShaderProgram* shaderprogram;
+  ShaderData data;
 
-	virtual void onUnInitialize(Graphics& gl) {}
-
-	virtual void onEnter(Graphics& gl, vsr_sec now) {
-
-//		if (shaderprogram.linked())
-
-		shaderprogram -> begin();
-		data.update( shaderprogram );
-
-		//Bind Current Time to Shader
-//		if (bTime) shaderprogram.uniform("now", 1.f );
-	}
-    virtual void onDraw(Graphics& gl) {};
-
-	virtual void onLeave(Graphics& gl, vsr_sec now) {
-//		if (shaderprogram.linked())
-		shaderprogram -> end();
-	}
-
-	bool bVert, bFrag, bGeom;
-	bool bTime;
-
-	ShaderProgram * shaderprogram;
-    ShaderData data;
-    
-
-
-	int unit;
+  int unit;
 };
 
 //----------------
 class MaterialNode : public DrawNode {
+ public:
+  MaterialNode(AssetManager* _am = NULL);
+  MaterialNode(Texture*);
+  virtual ~MaterialNode() {}
 
-	public:
+  void load(const Material& mat);
 
-		MaterialNode(AssetManager * _am = NULL);
-        MaterialNode(Texture * );
-		virtual ~MaterialNode() {}
+  virtual void onUnInitialize(Graphics& gl);
+  virtual void onInitialize(Graphics& gl);
+  virtual void onEnter(Graphics& gl, vsr_sec now);
+  virtual void onDraw(Graphics& gl);
+  virtual void onLeave(Graphics& gl, vsr_sec now);
 
-		void load(const Material& mat);
+  int nodeID;
 
-		virtual void onUnInitialize(Graphics& gl);
-		virtual void onInitialize(Graphics& gl);
-		virtual void onEnter(Graphics& gl, vsr_sec now);
-		virtual void onDraw(Graphics& gl);
-		virtual void onLeave(Graphics& gl, vsr_sec now) ;
+  AssetManager* am;
 
-		int nodeID;
+  bool loaded;
+  Vec3<float> scale;  ///< scaling factor
 
-		AssetManager * am;
+  typedef std::map<int, Texture*> Textures;
+  typedef std::map<int, Texture*>::iterator TexPtr;
 
-		bool loaded;
-		Vec3<float> scale;		///< scaling factor
+  Textures textures;
 
-        typedef std::map<int, Texture *> Textures;
-        typedef std::map<int, Texture *>::iterator TexPtr;
-    
-		Textures textures;    
-    
-        std::vector<Texture*> tex;
+  std::vector<Texture*> tex;
 };
 
 //--------------------
 class MeshNode : public DrawNode {
-    
-    MaterialNode * mMaterialNode;
-    ShaderNode * mShaderNode;
-    
-public:
-    
-    //Draw mode
-    enum DrawMethod {
-        VBO = 0,
-        VERTEXARRAY,
-        VERTEXATTRIB,
-        DISPLAYLIST,
-    };
-        
-    void method(DrawMethod dm) { mDrawMethod = dm; }
-    
-    MeshNode( Mesh * m );
-    MeshNode(AssetManager * _am = NULL );
-    
-    virtual ~MeshNode() {}
-    
-//    MaterialNode * material() { return mMaterialNode; }
-//    void material( MaterialNode * mn ) {  mMaterialNode = mn; }
-//    ShaderNode * shader() { return mShaderNode; }
-//    void shader(ShaderNode *sn) { mShaderNode = sn; }
-    
-    void load(const Mesh& m );
-    void add( Mesh * m ) { mesh.push_back(m); }
-    
-    virtual void onUnInitialize(Graphics& gl);
-    virtual void onInitialize(Graphics& gl);
-    virtual void onEnter(Graphics& gl, vsr_sec now);
-    virtual void onDraw(Graphics& gl);
-    virtual void onLeave(Graphics& gl, vsr_sec now) ;
-    
-    AssetManager * am;
-    Vec3f scale;		///< scaling factor    
-    
-    DisplayList list;
-    VAttrib     vpos, vcol, vtex;
+  MaterialNode* mMaterialNode;
+  ShaderNode* mShaderNode;
 
-    GLint modID; //Matrix Uniform Id on Shader
-   // VBO vbo;
-    
-    std::vector< Mesh * > mesh;	
-    
-private: 
-    
-    DrawMethod mDrawMethod;
+ public:
+  // Draw mode
+  enum DrawMethod {
+    VBO = 0,
+    VERTEXARRAY,
+    VERTEXATTRIB,
+    DISPLAYLIST,
+  };
+
+  void method(DrawMethod dm) { mDrawMethod = dm; }
+
+  MeshNode(Mesh* m);
+  MeshNode(AssetManager* _am = NULL);
+
+  virtual ~MeshNode() {}
+
+  //    MaterialNode * material() { return mMaterialNode; }
+  //    void material( MaterialNode * mn ) {  mMaterialNode = mn; }
+  //    ShaderNode * shader() { return mShaderNode; }
+  //    void shader(ShaderNode *sn) { mShaderNode = sn; }
+
+  void load(const Mesh& m);
+  void add(Mesh* m) { mesh.push_back(m); }
+
+  virtual void onUnInitialize(Graphics& gl);
+  virtual void onInitialize(Graphics& gl);
+  virtual void onEnter(Graphics& gl, vsr_sec now);
+  virtual void onDraw(Graphics& gl);
+  virtual void onLeave(Graphics& gl, vsr_sec now);
+
+  AssetManager* am;
+  Vec3f scale;  ///< scaling factor
+
+  DisplayList list;
+  VAttrib vpos, vcol, vtex;
+
+  GLint modID;  // Matrix Uniform Id on Shader
+  // VBO vbo;
+
+  std::vector<Mesh*> mesh;
+
+ private:
+  DrawMethod mDrawMethod;
 };
-	
-    
-    
-    
-    
-    
-    
-//------------    
+
+//------------
 class SpriteNode : public DrawNode {
-	public:
+ public:
+  SpriteNode(const char* img_src, AssetManager* am);
 
-		SpriteNode(const char * img_src, AssetManager * am);
+  virtual ~SpriteNode() {}
 
-		virtual ~SpriteNode() {}
+  virtual void onInitialize(Graphics& gl) {}
+  virtual void onUnInitialize(Graphics& gl) {}
 
-		virtual void onInitialize(Graphics& gl){}
-		virtual void onUnInitialize(Graphics& gl) {}
-
-		virtual void onEnter(Graphics& gl, vsr_sec now) {
-			GL::error("SpriteParticlesEnter0");
-//			update();
-			//spriteTex.bind(0);
-            GL::pointSize(10);
+  virtual void onEnter(Graphics& gl, vsr_sec now) {
+    GL::error("SpriteParticlesEnter0");
+    //			update();
+    // spriteTex.bind(0);
+    GL::pointSize(10);
 #ifdef NO_GEOMETRY_SHADER
 //			glBegin(GL::QUADS);
 #else
 //			glBegin(GL::P);
 #endif
-			GL::error("SpriteParticlesEnter1");
-		}
-        virtual void onDraw(Graphics& gl) {};
+    GL::error("SpriteParticlesEnter1");
+  }
+  virtual void onDraw(Graphics& gl){};
 
-		virtual void onLeave(Graphics& gl, vsr_sec now) {
-//			glEnd();
-			//spriteTex.unbind(0);
-		}
+  virtual void onLeave(Graphics& gl, vsr_sec now) {
+    //			glEnd();
+    // spriteTex.unbind(0);
+  }
 
-		//	App * app;
-		AssetManager * am;
-		Texture spriteTex;
-		float pointsize;
-    
-//		void update() {
-//			dynamic_cast< ShaderNode * > ( mParent ) -> uniformf[0].val = pointsize;
-//			dynamic_cast< ShaderNode * > ( mParent ) -> update();
-//		}
-	};
+  //	App * app;
+  AssetManager* am;
+  Texture spriteTex;
+  float pointsize;
 
-} // vsr::
+  //		void update() {
+  //			dynamic_cast< ShaderNode * > ( mParent ) -> uniformf[0].val =
+  //pointsize; 			dynamic_cast< ShaderNode * > ( mParent ) -> update();
+  //		}
+};
+
+}  // namespace vsr
 
 #endif

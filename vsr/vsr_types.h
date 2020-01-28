@@ -14,41 +14,40 @@
 
 using namespace std;
 namespace vsr {
-    
 
-    enum StandardTypes {
-        BOOLEAN,
-        UCHAR,
-        CHAR,
-        UINT,
-        INT,
-        ULONG,
-        LONG,
-        FLOAT,
-        DOUBLE        
-    };
+enum StandardTypes {
+  BOOLEAN,
+  UCHAR,
+  CHAR,
+  UINT,
+  INT,
+  ULONG,
+  LONG,
+  FLOAT,
+  DOUBLE
+};
 
-    typedef std::map< const char *, int> NameMap;
+typedef std::map<const char *, int> NameMap;
 
-    NameMap create_types(){
-        NameMap m;
-        bool b;
-        unsigned char uc;
-    //    char c;
-        float f;
-        double d;
-        int i;
-        
-        m[ typeid(b).name() ] = BOOLEAN;
-        m[ typeid(uc ).name() ] = UCHAR;
-        m[ typeid(f ).name() ] = FLOAT;
-        m[ typeid(d ).name() ] = DOUBLE;
-        m[ typeid(i ).name() ] = DOUBLE;
-        return m;
-    }
+NameMap create_types() {
+  NameMap m;
+  bool b;
+  unsigned char uc;
+  //    char c;
+  float f;
+  double d;
+  int i;
 
-    static NameMap Types = create_types();
+  m[typeid(b).name()] = BOOLEAN;
+  m[typeid(uc).name()] = UCHAR;
+  m[typeid(f).name()] = FLOAT;
+  m[typeid(d).name()] = DOUBLE;
+  m[typeid(i).name()] = DOUBLE;
+  return m;
+}
 
-} //vsr::
+static NameMap Types = create_types();
+
+}  // namespace vsr
 
 #endif

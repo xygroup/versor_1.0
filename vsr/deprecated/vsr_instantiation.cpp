@@ -1,7 +1,7 @@
 #include "MV.h"
 #include "vsr_casts.h"
-namespace vsr{
-	
+namespace vsr {
+
 //	template class MV<4,ROT,VSR_PRECISION>;
 //	template class MV<8,MOT,VSR_PRECISION>;
 //	template class MV<2,DIL,VSR_PRECISION>;
@@ -167,4 +167,4 @@ namespace vsr{
 //	template class MV<8,HYP_DRV_TNB,VSR_PRECISION>;
 //	template class MV<8,HYP_VEC_MNV,VSR_PRECISION>;
 //	template class MV<11,PSS_MNK_PNT_SPH,VSR_PRECISION>;
-}//vsr::
+}  // namespace vsr

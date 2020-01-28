@@ -12,30 +12,30 @@
 #include "vsr_gl_vattrib.h"
 #include "vsr_gl_vbo.h"
 
-//IN PROGRESS (reworking PIPE from vsr_mdraw.h)
+// IN PROGRESS (reworking PIPE from vsr_mdraw.h)
 
-namespace vsr{
+namespace vsr {
 
-    struct Pipeline {
+struct Pipeline {
+  static std::map<int, DBO> vbo;
 
-        static std::map<int, DBO> vbo;
-    
-        ShaderProgram * shaderprogram;
+  ShaderProgram* shaderprogram;
 
-        static VAttrib4 vatt;
-    
-    static Uniform LightPosition;
-    
-    void init(){                      
-        
-        //Only Call After Shader is Bound
-        vatt.pos.set( Shader :: Current(), "position", sizeof(Vertex), 3, 0);
-        vatt.col.set( Shader :: Current(), "sourceColor", sizeof(Vertex), 4, Vertex::oc() );
-        vatt.norm.set( Shader :: Current(), "normal", sizeof(Vertex), 3, Vertex::on() );
-        vatt.tex.set( Shader :: Current(), "texCoord", sizeof(Vertex), 2, Vertex::ot() );
-    
-    };
+  static VAttrib4 vatt;
 
-} //vsr::
+  static Uniform LightPosition;
+
+  void init() {
+    // Only Call After Shader is Bound
+    vatt.pos.set(Shader ::Current(), "position", sizeof(Vertex), 3, 0);
+    vatt.col.set(Shader ::Current(), "sourceColor", sizeof(Vertex), 4,
+                 Vertex::oc());
+    vatt.norm.set(Shader ::Current(), "normal", sizeof(Vertex), 3,
+                  Vertex::on());
+    vatt.tex.set(Shader ::Current(), "texCoord", sizeof(Vertex), 2,
+                 Vertex::ot());
+  };
+
+}  // vsr::
 
 #endif

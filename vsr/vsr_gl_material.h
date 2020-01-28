@@ -13,27 +13,22 @@
 
 namespace vsr {
 
-    using namespace std; 
-    
-    struct TexAss {
-        
-        bool useTexture;
-        string texture;
-        
-    };
-    
-    class Material {
-      
-    public:
-        
-        TexAss emissivemap, specularmap, ambientmap, diffusemap;
-        TexAss heightmap, normalmap, shininessmap, displacementmap, opacitymap;
-        TexAss lightmap, reflectionmap;
-        
-    private:
-        
-    };
-    
-}
+using namespace std;
+
+struct TexAss {
+  bool useTexture;
+  string texture;
+};
+
+class Material {
+ public:
+  TexAss emissivemap, specularmap, ambientmap, diffusemap;
+  TexAss heightmap, normalmap, shininessmap, displacementmap, opacitymap;
+  TexAss lightmap, reflectionmap;
+
+ private:
+};
+
+}  // namespace vsr
 
 #endif
